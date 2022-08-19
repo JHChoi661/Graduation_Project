@@ -6,7 +6,6 @@ import mediapipe as mp
 from google.protobuf.json_format import MessageToDict
 import tensorflow as tf
 
-os.chdir('C:/gradProject') # 작업 디렉토리 설정
 
 ##############################Detection setup####################################
 mp_hands = mp.solutions.hands     # Holistic model
@@ -25,7 +24,7 @@ def mediapipe_detection(image, model):
 
 ############################Setup Folders for Collection#########################
 # Path for exported data, numpy arrays
-DATA_PATH = os.path.join(os.getcwd(), 'Gesture_DATA')
+DATA_PATH = 'C:/gradProject/Gesture_DATA'
 
 # Actions that we try to detect
 actions = np.array(['Hello', 'TV', 'On', 'Off'])                 # can add actions
@@ -120,9 +119,9 @@ model.summary()    # for debug
 
 ##################################Save Weights####################################
 
-model.save('action_epoch114_es.h5')
+model.save('C:/gradProject/Model/action_epoch114_es.h5')
 
-model.load_weights('action_epoch114_es.h5')
+model.load_weights('C:/gradProject/Model/action_epoch114_es.h5')
 ##############################optimizing model###################################
 # convert h5 model into tflite model
 h5model = tf.keras.models.load_model('action_test.h5')

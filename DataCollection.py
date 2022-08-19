@@ -6,7 +6,6 @@ from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
 from google.protobuf.json_format import MessageToDict
-os.chdir('C:/gradProject') # dir set
 import sys
 import shutil
 
@@ -47,7 +46,7 @@ def extract_keypoints(results):
 
 ### setup folders for collection
 # Path for exported data, numpy arrays
-DATA_PATH = os.path.join(os.getcwd(), 'Gesture_DATA') 
+DATA_PATH = 'C:/gradProject/Gesture_DATA'
 
 # Actions that we try to detect
 actions = np.array(['Hello', 'TV', 'On', 'Off'])                 # can add actions, change into other word to collect data one at once

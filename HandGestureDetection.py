@@ -12,7 +12,6 @@ import time
 
 ### init
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"                                # use tensorflow-cpu
-os.chdir('C:/gradProject') # dir set
 
 
 ### detection setup
@@ -51,7 +50,7 @@ def draw_landmarks(image, results):
         for handLms in results.multi_hand_landmarks:
             mp_drawing.draw_landmarks(image, handLms, mp_hands.HAND_CONNECTIONS)
 
-DATA_PATH = os.path.join(os.getcwd(), 'Gesture_DATA') 
+DATA_PATH = 'C:/gradProject/Gesture_DATA'
 
 # Actions to detect
 actionsDict = {'Hello':0b000, 'TV':0b001, 'On':0b010, 'Off':0b010}       # use dict to sequence control
@@ -69,7 +68,7 @@ cap = cv2.VideoCapture(0)
 
 pTime = 0
 cTime = 0
-model = tf.keras.models.load_model('action_epoch300.h5')
+model = tf.keras.models.load_model('C:/gradProject/Model/action_epoch300.h5')
 skipCnt = 0 
 stage = -1
 # Set mediapipe model 

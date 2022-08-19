@@ -4,9 +4,8 @@ import random
 import math
 import shutil
 
-os.chdir('C:/gradProject') # dir set
 sequence_length = 30       # frame per one data set
-DATA_PATH = os.path.join(os.getcwd(), 'Gesture_DATA') 
+DATA_PATH = 'C:/gradProject/Gesture_DATA'
 actions = np.array(['Hello','TV', 'On', 'Off']) # list of actions
 no_sequences = 5              # number of true data (not augmented data)
 
