@@ -46,7 +46,9 @@ def extract_keypoints(results):
 
 ### setup folders for collection
 # Path for exported data, numpy arrays
-DATA_PATH = 'C:/gradProject/Gesture_DATA'
+PATH = os.getcwd()
+DATA_PATH = os.path.join(PATH, 'Gesture_DATA')
+MODEL_PATH = os.path.join(PATH, 'Model')
 
 # Actions that we try to detect
 actions = np.array(['Hello', 'TV', 'On', 'Off'])                 # can add actions, change into other word to collect data one at once

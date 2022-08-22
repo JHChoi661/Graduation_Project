@@ -5,7 +5,8 @@ import math
 import shutil
 
 sequence_length = 30       # frame per one data set
-DATA_PATH = 'C:/gradProject/Gesture_DATA'
+PATH = os.getcwd()
+DATA_PATH = os.path.join(PATH, 'Gesture_DATA')
 actions = np.array(['Hello','TV', 'On', 'Off']) # list of actions
 no_sequences = 5              # number of true data (not augmented data)
 

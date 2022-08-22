@@ -50,7 +50,8 @@ def draw_landmarks(image, results):
         for handLms in results.multi_hand_landmarks:
             mp_drawing.draw_landmarks(image, handLms, mp_hands.HAND_CONNECTIONS)
 
-DATA_PATH = 'C:/gradProject/Gesture_DATA'
+PATH = os.getcwd()
+MODEL_PATH = os.path.join(PATH, 'Model')
 
 # Actions to detect
 actionsDict = {'Hello':0b000, 'TV':0b001, 'On':0b010, 'Off':0b010}       # use dict to sequence control
@@ -68,7 +69,7 @@ cap = cv2.VideoCapture(0)
 
 pTime = 0
 cTime = 0
-model = tf.keras.models.load_model('C:/gradProject/Model/action_epoch300.h5')
+model = tf.keras.models.load_model(os.path.join(MODEL_PATH, 'action_epoch300.h5'))
 skipCnt = 0 
 stage = -1
 # Set mediapipe model 

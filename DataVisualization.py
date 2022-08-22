@@ -5,7 +5,7 @@ import mediapipe as mp
 from google.protobuf.json_format import MessageToDict
 # import tensorflow as tf
 import matplotlib.pyplot as plt
-DATA_PATH = 'C:/gradProject/Gesture_DATA'
+DATA_PATH = os.path.join(os.getcwd(), 'Gesture_DATA')
 sequence_length = 30
 mpDraw = mp.solutions.drawing_utils
 mpDraw.draw_landmarks

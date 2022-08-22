@@ -24,7 +24,9 @@ def mediapipe_detection(image, model):
 
 ############################Setup Folders for Collection#########################
 # Path for exported data, numpy arrays
-DATA_PATH = 'C:/gradProject/Gesture_DATA'
+PATH = os.getcwd()
+DATA_PATH = os.path.join(PATH, 'Gesture_DATA')
+MODEL_PATH = os.path.join(PATH, 'Model')
 
 # Actions that we try to detect
 actions = np.array(['Hello', 'TV', 'On', 'Off'])                 # can add actions
@@ -118,10 +120,11 @@ model.summary()    # for debug
 
 
 ##################################Save Weights####################################
+model = tf.keras.models.load_model(os.path.join(DATA_PATH, 'Model', 'action_epoch300.h5'))
 
-model.save('C:/gradProject/Model/action_epoch114_es.h5')
+model.save(os.path.join(MODEL_PATH ,'action_epoch114_es.h5'))
 
-model.load_weights('C:/gradProject/Model/action_epoch114_es.h5')
+model.load_weights(os.path.join(MODEL_PATH,'action_epoch114_es.h5'))
 ##############################optimizing model###################################
 # convert h5 model into tflite model
 h5model = tf.keras.models.load_model('action_test.h5')
