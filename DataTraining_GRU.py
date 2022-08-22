@@ -9,7 +9,7 @@ import tensorflow as tf
 
 ##############################Detection setup####################################
 mp_hands = mp.solutions.hands     # Holistic model
-mp_drawing = mp.solutions.drawing_utils # Drawing utilities
+mp_drawing = mp.solutions.drawing_utils  # Drawing utilities
 
 def mediapipe_detection(image, model):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # COLOR CONVERSION BGR 2 RGB
