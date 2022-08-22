@@ -1,9 +1,7 @@
-from math import remainder
 import cv2
 import numpy as np
 import os
 import mediapipe as mp
-from google.protobuf.json_format import MessageToDict
 import tensorflow as tf
 
 
@@ -32,7 +30,7 @@ MODEL_PATH = os.path.join(PATH, 'Model')
 actions = np.array(['Hello', 'TV', 'On', 'Off'])                 # can add actions
 # actions = np.array(['AC', 'Hello', 'TV', 'Channel', 'Volume', 'On', 'Off', 'Next', 'Prev', 'OK', 'Light', 'Brightness'])                 # can add actions
 # Thirty videos worth of data
-no_sequences = len(list(os.listdir(os.path.join(DATA_PATH,actions[0]))))
+no_sequences = 30#len(list(os.listdir(os.path.join(DATA_PATH,actions[0]))))
 
 
 # Videos are going to be 30 frames in length
@@ -48,20 +46,16 @@ import time
 label_map = {label:num for num, label in enumerate(actions)}
 # t1 = time.time()
 
-
-
 sequences, labels = [], []
 for action in actions:
-    for sequence in np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int):
-        window = []
-        for frame_num in range(sequence_length):
-            res = np.load(os.path.join(DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
-            # if np.dtype(res[0]) == 'float64':
-            #     print(type(res[0]))
-            window.append(res)
-        sequences.append(window)
-        labels.append(label_map[action])
-# print(time.time()-t1)
+    s = np.load(os.path.join(PATH, "{}Data.npy".format(action)))
+    l = np.load(os.path.join(PATH, "{}Label.npy".format(action)))
+    if len(sequences) == 0:
+        sequences = s
+        labels = l
+    else:
+        sequences = np.concatenate((sequences,s),axis = 0)
+        labels = np.concatenate((labels,l),axis = 0)
 
 X = np.array(sequences)
 y = to_categorical(labels).astype(int)
@@ -78,7 +72,7 @@ from tensorflow.keras.layers import Dense, BatchNormalization, Dropout, GRU, LST
 from tensorflow.keras.callbacks import TensorBoard
 from keras.callbacks import EarlyStopping
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 log_dir = os.path.join('Logs')
 tb_callback = TensorBoard(log_dir=log_dir) # to debug training process
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=30)
@@ -95,45 +89,26 @@ model.add(Dense(actions.shape[0], activation='softmax'))
 
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 
-#################################################################################
-label_map = {label:num for num, label in enumerate(actions)}
-
-def my_generator():
-    for action in actions:
-        for sequence in np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int):
-            window = []
-            for frame_num in range(sequence_length):
-                res = np.load(os.path.join(DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
-                window.append(res)
-            yield (window, to_categorical(label_map[action],4).astype(int))
-
-dataset = tf.data.Dataset.from_generator(my_generator,(tf.float32, tf.int8))
-dataset = dataset.batch(10)
-
-#################################################################################
-
 model.fit(X_train,y_train, validation_data = (X_val, y_val), epochs=300, callbacks=[es, tb_callback]) # change epochs to prevent overfitting
 
 model.summary()    # for debug
 # #################################################################################
 
-
+modelName = 'action_84es_0822.h5'
 
 ##################################Save Weights####################################
-model = tf.keras.models.load_model(os.path.join(DATA_PATH, 'Model', 'action_epoch300.h5'))
+model.save(os.path.join(MODEL_PATH ,modelName))
 
-model.save(os.path.join(MODEL_PATH ,'action_epoch114_es.h5'))
-
-model.load_weights(os.path.join(MODEL_PATH,'action_epoch114_es.h5'))
+model.load_weights(os.path.join(MODEL_PATH,modelName))
 ##############################optimizing model###################################
-# convert h5 model into tflite model
-h5model = tf.keras.models.load_model('action_test.h5')
+# # convert h5 model into tflite model
+# h5model = tf.keras.models.load_model('action_test.h5')
 
-converter = tf.lite.TFLiteConverter.from_keras_model(h5model)
-tflite_model = converter.convert()
+# converter = tf.lite.TFLiteConverter.from_keras_model(h5model)
+# tflite_model = converter.convert()
 
-with open('model_ACTEST.tflite','wb') as f:
-    f.write(tflite_model)
+# with open('model_ACTEST.tflite','wb') as f:
+#     f.write(tflite_model)
 
 ################Evaluation using Confusion Matrix and Accuracy###################
 from sklearn.metrics import multilabel_confusion_matrix, accuracy_score  

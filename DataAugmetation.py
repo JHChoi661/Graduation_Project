@@ -287,15 +287,6 @@ def generateAugmentedData():
         data = dataDict[action]
         data_copy = np.copy(data)
         for _ in range(400):       # range X no_sequences = number of aug data
-            # augType = random.randint(1,3)
-            # if augType == 1:
-            #     augmentedData = dataAug_Translation(data_copy)
-            # elif augType == 2:
-            #     augmentedData = dataAug_Rotate_Preprocessing(data_copy)
-            # elif augType == 3:
-            #     augmentedData = dataAug_windowWarping(data_copy)
-            # else: pass                
-            # print(augType, np.mean(augmentedData[0][0]))
             augmentedData = dataAug_Translation(data_copy)
             augmentedData = dataAug_Rotate_Preprocessing(augmentedData)
             augmentedData = dataAug_windowWarping(augmentedData)
