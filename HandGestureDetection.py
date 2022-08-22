@@ -69,7 +69,8 @@ cap = cv2.VideoCapture(0)
 
 pTime = 0
 cTime = 0
-model = tf.keras.models.load_model(os.path.join(MODEL_PATH, 'action_epoch300.h5'))
+# from DataTraining_GRU import modelName
+model = tf.keras.models.load_model(os.path.join(MODEL_PATH, 'action_84es_0822.h5'))
 skipCnt = 0 
 stage = -1
 # Set mediapipe model 
@@ -85,7 +86,7 @@ with mp_hands.Hands(min_detection_confidence=0.8, min_tracking_confidence=0.8) a
             keypoints = extract_keypoints(r)
         # print(keypoints)
             sequence.append(keypoints)
-            if skipCnt == 5:
+            if skipCnt == 30:
                 skipCnt = 0
                 sequence = sequence[-30:]
 
