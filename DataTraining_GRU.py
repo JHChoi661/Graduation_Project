@@ -48,8 +48,8 @@ label_map = {label:num for num, label in enumerate(actions)}
 
 sequences, labels = [], []
 for action in actions:
-    s = np.load(os.path.join(PATH, "{}Data.npy".format(action)))
-    l = np.load(os.path.join(PATH, "{}Label.npy".format(action)))
+    s = np.load(os.path.join(DATA_PATH, 'merged_DATA', "{}Data.npy".format(action)))
+    l = np.load(os.path.join(DATA_PATH, 'merged_DATA', "{}Label.npy".format(action)))
     if len(sequences) == 0:
         sequences = s
         labels = l
