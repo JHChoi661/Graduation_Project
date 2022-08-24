@@ -1,14 +1,6 @@
-
-import cv2
-import numpy as np
-import os
-import math
-from time import *
-import mediapipe as mp
+from CommonSettings import *
 from google.protobuf.json_format import MessageToDict
 import tensorflow as tf
-import psutil
-import time
 
 ### init
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"                                # use tensorflow-cpu

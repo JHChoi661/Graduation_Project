@@ -1,18 +1,13 @@
-import cv2
-import numpy as np
-import os
-import mediapipe as mp
-from google.protobuf.json_format import MessageToDict
-# import tensorflow as tf
+from CommonSettings import *
 import matplotlib.pyplot as plt
+
 DATA_PATH = os.path.join(os.getcwd(), 'Gesture_DATA')
 sequence_length = 30
 mpDraw = mp.solutions.drawing_utils
 mpDraw.draw_landmarks
 mpHands = mp.solutions.hands
 hands = mpHands.Hands(False, 2, 0.7, 0.7) # Same as default parameter
-actions = np.array(['Hello', 'TV', 'On', 'Off'])                 # can add actions
-c = 0
+actions = np.array(['Hello', 'TV', 'On', 'Off', 'Right', 'Left', 'Up', 'Down'])
 
 hConnenctions = []
 for t in mpHands.HAND_CONNECTIONS:
@@ -22,14 +17,14 @@ for t in mpHands.HAND_CONNECTIONS:
             
 plt.figure(figsize=(15,8))
 # for action in actions:
-for action in ['Off']:
+for action in ['Up']:
     # for sequence in np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int):
     for sequence in range(1,6):
         window = []
-        for frame_num in range(sequence_length):
+        for frame_num in range(1,sequence_length):
             res = np.load(os.path.join(DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
             # print(res)
-            res_compare = np.load(os.path.join(DATA_PATH, action, str(sequence+20), "{}.npy".format(frame_num)))
+            # res_compare = np.load(os.path.join(DATA_PATH, action, str(sequence+20), "{}.npy".format(frame_num)))
 
             
             # print(res_compare)
@@ -73,7 +68,7 @@ for action in ['Off']:
 
             
             plt.show(block=False)
-            plt.pause(0.02)
+            plt.pause(0.08)
             plt.clf()
             window.append(res)
         # print(window)

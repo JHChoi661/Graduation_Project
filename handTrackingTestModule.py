@@ -6,7 +6,7 @@ import os
 from matplotlib import pyplot as plt
 import mediapipe as mp
 class handDetector():
-    def __init__(self, mode=False, maxHands=2, detectionCon=0.6, trackCon=0.6):
+    def __init__(self, mode=False, maxHands=2, detectionCon=0.85, trackCon=0.85):
         self.mode = mode
         self.maxHands = maxHands
         self.detectionCon = detectionCon
@@ -27,7 +27,7 @@ class handDetector():
             self.ifHands = 1
             for handLms in self.results.multi_hand_landmarks:
                 if draw:
-                    print(handLms)
+                    # print(handLms)
                     self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
 
         return img
@@ -54,9 +54,8 @@ def main():
     pTime = 0
     cTime = 0
     cap = cv2.VideoCapture(0)
-    cap.release()
-    cap = cv2.VideoCapture(0)
     detector = handDetector()
+    
 
     while True:
         success, img = cap.read()
@@ -74,9 +73,19 @@ def main():
         cv2.imshow("Image", img)
         if cv2.waitKey(10) & 0xFF == ord('q'):
             break
+        # time.sleep(0.01)
     # print(lmList)
     cap.release()
 
 if __name__ == "__main__":
+    # img = cv2.imread('C:\gradProject\still1.jpg')
+    # detector = handDetector()
+    
+    # for i in range(1,8):
+    #     img = cv2.imread(os.path.join('C:\gradProject', 'still{}.jpg'.format(i)))
+    #     img = detector.findHands(img)
+    #     lmList = detector.findPosition(img, False)
+    #     cv2.imshow("Image", img)
+    #     cv2. waitKey(0)
     main()
     
