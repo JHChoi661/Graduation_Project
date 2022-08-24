@@ -1,10 +1,4 @@
-import cv2
-
-import numpy as np
-import os
-from matplotlib import pyplot as plt
-import time
-import mediapipe as mp
+from CommonSettings import *
 from google.protobuf.json_format import MessageToDict
 import sys
 import shutil
@@ -51,24 +45,25 @@ DATA_PATH = os.path.join(PATH, 'Gesture_DATA')
 MODEL_PATH = os.path.join(PATH, 'Model')
 
 # Actions that we try to detect
-actions = np.array(['Hello', 'TV', 'On', 'Off'])                 # can add actions, change into other word to collect data one at once
 ## 'Hello', 'TV', 'Channel', 'Volume', 'On', 'Off', 'Next', 'Prev', 'OK'
 
 # length of data
 no_sequences = 5  # n data folders will be created
 
 # Videos are going to be 30 frames in length
-sequence_length = 30
+sequence_length = 60
 
 # To stack data
 # dataLen = len(list(os.listdir('C:/gradProject/Gesture_DATA')))
 
 def clearData():
     for action in actions:
-        dataLen = len(list(os.listdir(os.path.join(DATA_PATH,action))))
-        dataIdx = list(range(1,dataLen+1))
-        for i in dataIdx:
-            shutil.rmtree(os.path.join(DATA_PATH, action, str(i)))
+        try:
+            dataName = (os.listdir(os.path.join(DATA_PATH,action)))
+            for n in dataName:
+                shutil.rmtree(os.path.join(DATA_PATH, action, n))
+        except:
+            pass
 
 clearData()
 
@@ -83,26 +78,25 @@ for action in actions: # making dir MP_DATA
 ### Collect Keypoint Values for Training and Testing
 cap = cv2.VideoCapture(0)
 # Set mediapipe model 
-with mp_hands.Hands(False,2, 0.6, 0.6) as hands:
+with mp_hands.Hands(False,2, 0.8, 0.8) as hands:
     
     # Loop through actions
     for action in actions:
         # Loop through sequences aka videos
         for sequence in range(1, no_sequences+1):
             # Loop through video length aka sequence length
-            for frame_num in range(sequence_length+1):
-
+            for frame_num in range(sequence_length):
                 # Read feed
-                ret, frame = cap.read()
 
                 # Make detections
-                image, results = mediapipe_detection(frame, hands)
-
+                while True:
+                    ret, frame = cap.read()
+                    image, results = mediapipe_detection(frame, hands)
+                    if results.multi_hand_landmarks:
+                        break
                 # Draw landmarks
-                if results.multi_hand_landmarks:
-                # print(results.multi_hand_landmarks)
-                    for handLms in results.multi_hand_landmarks:
-                        mp_drawing.draw_landmarks(image, handLms, mp_hands.HAND_CONNECTIONS)
+                for handLms in results.multi_hand_landmarks:
+                    mp_drawing.draw_landmarks(image, handLms, mp_hands.HAND_CONNECTIONS)
                 
                 # NEW Apply wait logic
                 if frame_num == 0: 
@@ -123,12 +117,12 @@ with mp_hands.Hands(False,2, 0.6, 0.6) as hands:
                     cv2.imshow('OpenCV Feed', image)
                 
                 # NEW Export keypoints
-                if frame_num == 0:
+                if frame_num % 2 == 1:
+                    keypoints = extract_keypoints(results)
+                    npy_path = os.path.join(DATA_PATH, action, str(sequence), str(int(frame_num/2)))
+                    np.save(npy_path, keypoints)
+                else:
                     continue
-                keypoints = extract_keypoints(results)
-                npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num-1))
-                np.save(npy_path, keypoints)
-
                 # Break gracefully
                 if cv2.waitKey(10) & 0xFF == ord('q'):
                     break
@@ -136,6 +130,7 @@ with mp_hands.Hands(False,2, 0.6, 0.6) as hands:
                     cap.release()
                     cv2.destroyAllWindows()
                     sys.exit()
+
 cap.release()
 cv2.destroyAllWindows()
 #################################################################################
