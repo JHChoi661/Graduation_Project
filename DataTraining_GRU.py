@@ -1,6 +1,8 @@
 from CommonSettings import *
 import tensorflow as tf
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 
 ##############################Detection setup####################################
 mp_hands = mp.solutions.hands     # Holistic model
@@ -22,18 +24,13 @@ def mediapipe_detection(image, model):
 PATH = os.getcwd()
 DATA_PATH = os.path.join(PATH, 'Gesture_DATA')
 MODEL_PATH = os.path.join(PATH, 'Model')
-
-# Actions that we try to detect
-actions = np.array(['Hello', 'TV', 'On', 'Off'])                 # can add actions
-# actions = np.array(['AC', 'Hello', 'TV', 'Channel', 'Volume', 'On', 'Off', 'Next', 'Prev', 'OK', 'Light', 'Brightness'])                 # can add actions
-# Thirty videos worth of data
-no_sequences = 30#len(list(os.listdir(os.path.join(DATA_PATH,actions[0]))))
-
+no_sequences = trueDataCnt
 
 # Videos are going to be 30 frames in length
 sequence_length = 30
 
 #################################################################################
+
 
 # ###############Preprocess Data and Create Labels and Features####################
 # # one-hot encoding
@@ -46,19 +43,18 @@ label_map = {label:num for num, label in enumerate(actions)}
 sequences, labels = [], []
 for action in actions:
     s = np.load(os.path.join(DATA_PATH, 'merged_DATA', "{}Data.npy".format(action)))
-    l = np.load(os.path.join(DATA_PATH, 'merged_DATA', "{}Label.npy".format(action)))
     if len(sequences) == 0:
         sequences = s
-        labels = l
     else:
-        sequences = np.concatenate((sequences,s),axis = 0)
-        labels = np.concatenate((labels,l),axis = 0)
+        sequences = np.append(sequences, s, axis=0)
+    label = np.zeros(augDataCnt) + label_map[action]
+    labels = np.append(labels,label)
 
 X = np.array(sequences)
 y = to_categorical(labels).astype(int)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20) # 90% of data will be used as train data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20) # 80% of data will be used as train data
 X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
-print(X.shape)
+print(X.shape, y.shape)
 # #################################################################################
 
 
@@ -69,29 +65,25 @@ from tensorflow.keras.layers import Dense, BatchNormalization, Dropout, GRU, LST
 from tensorflow.keras.callbacks import TensorBoard
 from keras.callbacks import EarlyStopping
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 log_dir = os.path.join('Logs')
 tb_callback = TensorBoard(log_dir=log_dir) # to debug training process
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=30)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10)
 
 model = Sequential()
-model.add(LSTM(4, return_sequences=True,  input_shape=(30,126))) # 126 = 21(left hand)*3 + 21(right hand)*3
+model.add(GRU(8, return_sequences=True, dropout=0.4, input_shape=(30,126))) # 126 = 21(left hand)*3 + 21(right hand)*3
 model.add(BatchNormalization())
-model.add(Dropout(0.5))
-model.add(LSTM(8, return_sequences=False))
+model.add(GRU(8, return_sequences=False, dropout=0.5,))
 model.add(BatchNormalization())
-model.add(Dropout(0.5))
-model.add(Dense(8, activation='relu'))
+# model.add(Dense(12, activation='relu'))
 model.add(Dense(actions.shape[0], activation='softmax'))
 
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-
-model.fit(X_train,y_train, validation_data = (X_val, y_val), epochs=300, callbacks=[es, tb_callback]) # change epochs to prevent overfitting
+model.fit(X_train,y_train, validation_data = (X_val, y_val),batch_size=32, epochs=300, callbacks=[es, tb_callback]) # change epochs to prevent overfitting
 
 model.summary()    # for debug
 # #################################################################################
 
-modelName = 'action_84es_0822.h5'
+modelName = 'action_0825_4.h5'
 
 ##################################Save Weights####################################
 model.save(os.path.join(MODEL_PATH ,modelName))
