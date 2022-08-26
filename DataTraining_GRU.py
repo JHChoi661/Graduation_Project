@@ -70,9 +70,9 @@ tb_callback = TensorBoard(log_dir=log_dir) # to debug training process
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10)
 
 model = Sequential()
-model.add(GRU(8, return_sequences=True, dropout=0.4, input_shape=(30,126))) # 126 = 21(left hand)*3 + 21(right hand)*3
+model.add(GRU(16, return_sequences=True, dropout=0.5, input_shape=(30,126))) # 126 = 21(left hand)*3 + 21(right hand)*3
 model.add(BatchNormalization())
-model.add(GRU(8, return_sequences=False, dropout=0.5,))
+model.add(GRU(12, return_sequences=False, dropout=0.5,))
 model.add(BatchNormalization())
 # model.add(Dense(12, activation='relu'))
 model.add(Dense(actions.shape[0], activation='softmax'))
@@ -83,7 +83,7 @@ model.fit(X_train,y_train, validation_data = (X_val, y_val),batch_size=32, epoch
 model.summary()    # for debug
 # #################################################################################
 
-modelName = 'action_0825_4.h5'
+modelName = 'action_0826_1.h5'
 
 ##################################Save Weights####################################
 model.save(os.path.join(MODEL_PATH ,modelName))
