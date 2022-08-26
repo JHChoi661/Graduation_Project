@@ -283,15 +283,18 @@ def clearAugmentedData():
             shutil.rmtree(os.path.join(DATA_PATH, action, str(i+1)))
 
 
-def generateAugmentedData(action, mergedData):
+def generateAugmentedData(action, mergedData, noRotate, noFlip):
     dataDict = loadData()
     data = dataDict[action]
     data_copy = np.copy(data)
-    for i in range(augDataCnt/(5*len(processArray))):       # range X no_sequences = number of aug data
+    for i in range(int(augDataCnt/(5*8))):       # range X no_sequences = number of aug data
         augmentedData = dataAug_Translation(data_copy)
-        augmentedData = dataAug_Rotate_Preprocessing(augmentedData)
+        if noRotate:
+            pass
+        else:
+            augmentedData = dataAug_Rotate_Preprocessing(augmentedData)
         augmentedData = dataAug_windowWarping(augmentedData)
-        if action == 'Left' or action == 'Right':
+        if noFlip:
             pass
         else:
             flip = random.randint(0,1)
@@ -310,13 +313,23 @@ def generateAugmentedData(action, mergedData):
 if __name__ == "__main__":
     manager = Manager()
     dataDict = loadData()
+    noRotate = 0
+    noFlip = 0
     for action in actions:
+        if action in ['Left', 'Right', 'Up', 'Down']:
+            noRotate = 1
+            if action == 'Left' or action == 'Right':
+                noFlip = 1
         mergedData = manager.list()
-        p1 = Process(target=generateAugmentedData, args=(action, mergedData,))
-        p2 = Process(target=generateAugmentedData, args=(action, mergedData,))
-        p3 = Process(target=generateAugmentedData, args=(action, mergedData,))
-        p4 = Process(target=generateAugmentedData, args=(action, mergedData,))
-        processArray = [p1, p2, p3, p4]
+        p1 = Process(target=generateAugmentedData, args=(action, mergedData, noRotate, noFlip,))
+        p2 = Process(target=generateAugmentedData, args=(action, mergedData, noRotate, noFlip,))
+        p3 = Process(target=generateAugmentedData, args=(action, mergedData, noRotate, noFlip,))
+        p4 = Process(target=generateAugmentedData, args=(action, mergedData, noRotate, noFlip,))
+        p5 = Process(target=generateAugmentedData, args=(action, mergedData, noRotate, noFlip,))
+        p6 = Process(target=generateAugmentedData, args=(action, mergedData, noRotate, noFlip,))
+        p7 = Process(target=generateAugmentedData, args=(action, mergedData, noRotate, noFlip,))
+        p8 = Process(target=generateAugmentedData, args=(action, mergedData, noRotate, noFlip,))
+        processArray = [p1, p2, p3, p4, p5, p6, p7, p8]
 
         for p in processArray:
             p.start()
@@ -326,6 +339,9 @@ if __name__ == "__main__":
 
         print(np.shape(mergedData))
         np.save(os.path.join(MERGED_DATA_PATH,action+'Data'), mergedData)
+
+
+    
 
 
 
