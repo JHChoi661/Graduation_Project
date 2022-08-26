@@ -1,14 +1,13 @@
-import numpy as np
-import os
+from CommonSettings import *
 import random
 import math
 import shutil
+from multiprocessing import Process, Value, Array, Lock, Queue, Manager
 
 sequence_length = 30       # frame per one data set
 PATH = os.getcwd()
 DATA_PATH = os.path.join(PATH, 'Gesture_DATA')
-actions = np.array(['Hello','TV', 'On', 'Off']) # list of actions
-no_sequences = 5              # number of true data (not augmented data)
+no_sequences = trueDataCnt              # number of true data (not augmented data)
 
 def loadData():
 
@@ -273,6 +272,9 @@ def saveAugmentedData(data, action):
             np.save(npy_path,frame_1)
 
 
+
+
+
 def clearAugmentedData():
     for action in actions:
         dataLen = len(list(os.listdir(os.path.join(DATA_PATH,action))))
@@ -281,27 +283,54 @@ def clearAugmentedData():
             shutil.rmtree(os.path.join(DATA_PATH, action, str(i+1)))
 
 
-def generateAugmentedData():
+def generateAugmentedData(action, mergedData):
     dataDict = loadData()
-    for action in actions:
-        data = dataDict[action]
-        data_copy = np.copy(data)
-        for _ in range(400):       # range X no_sequences = number of aug data
-            augmentedData = dataAug_Translation(data_copy)
-            augmentedData = dataAug_Rotate_Preprocessing(augmentedData)
-            augmentedData = dataAug_windowWarping(augmentedData)
+    data = dataDict[action]
+    data_copy = np.copy(data)
+    for i in range(augDataCnt/(5*len(processArray))):       # range X no_sequences = number of aug data
+        augmentedData = dataAug_Translation(data_copy)
+        augmentedData = dataAug_Rotate_Preprocessing(augmentedData)
+        augmentedData = dataAug_windowWarping(augmentedData)
+        if action == 'Left' or action == 'Right':
+            pass
+        else:
             flip = random.randint(0,1)
             if flip:
                 augmentedData = dataAug_flip(augmentedData)
-            augmentedData = dataAug_Rescale(augmentedData)
-            # print(type(augmentedData[0][0][0]))
-            augmentedData = normalizeAugmentedData(augmentedData)
-            saveAugmentedData(augmentedData, action)
+        augmentedData = dataAug_Rescale(augmentedData)
+        augmentedData = normalizeAugmentedData(augmentedData)
+        
+        for d in augmentedData:
+            mergedData.append(d)
+    # print(np.shape(mergedData))
+    
+        # saveAugmentedData(augmentedData, action)
+
 
 if __name__ == "__main__":
-    
-    clearAugmentedData()
-    generateAugmentedData()
+    manager = Manager()
+    dataDict = loadData()
+    for action in actions:
+        mergedData = manager.list()
+        p1 = Process(target=generateAugmentedData, args=(action, mergedData,))
+        p2 = Process(target=generateAugmentedData, args=(action, mergedData,))
+        p3 = Process(target=generateAugmentedData, args=(action, mergedData,))
+        p4 = Process(target=generateAugmentedData, args=(action, mergedData,))
+        processArray = [p1, p2, p3, p4]
+
+        for p in processArray:
+            p.start()
+
+        for p in processArray:
+            p.join()
+
+        print(np.shape(mergedData))
+        np.save(os.path.join(MERGED_DATA_PATH,action+'Data'), mergedData)
+
+
+
+    # clearAugmentedData()
+    # generateAugmentedData()
     
 
 
